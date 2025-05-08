@@ -93,6 +93,20 @@ public class TicketService {
         }
         return false;
     }
+    
+    // Update Ticket Status Only
+    public boolean updateTicketStatus(int ticketId, String status) {
+        String query = "UPDATE tickets SET status = ? WHERE ticket_id = ?";
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, status);
+            stmt.setInt(2, ticketId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     // Delete Ticket
     public boolean deleteTicket(int id) {
