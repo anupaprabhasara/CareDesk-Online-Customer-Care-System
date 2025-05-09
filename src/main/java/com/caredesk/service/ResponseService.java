@@ -23,6 +23,31 @@ public class ResponseService {
         }
         return false;
     }
+    
+    // Get Response by Ticket ID
+    public List<Response> getResponsesByTicketId(int ticketId) {
+        List<Response> responses = new ArrayList<>();
+        String query = "SELECT * FROM view_responses WHERE ticket_id = ? ORDER BY response_id";
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, ticketId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Response response = new Response();
+                response.setResponseId(rs.getInt("response_id"));
+                response.setTicketId(rs.getInt("ticket_id"));
+                response.setAdminId(rs.getInt("admin_id"));
+                response.setResponderName(rs.getString("responder_name"));
+                response.setResponderRole(rs.getString("responder_role"));
+                response.setMessage(rs.getString("message"));
+                response.setCreatedAt(rs.getString("created_at"));
+                responses.add(response);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return responses;
+    }
 
     // Get Response by ID
     public Response getResponse(int id) {
