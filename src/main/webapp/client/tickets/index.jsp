@@ -59,6 +59,11 @@
 					  </a>
 					
 					  <c:if test="${ticket.status eq 'Open'}">
+					    <a href="${pageContext.request.contextPath}/ticket?action=edit&id=${ticket.ticketId}"
+					       class="text-yellow-500 hover:text-yellow-700">
+					      <i class="fas fa-edit"></i> Edit
+					    </a>
+					
 					    <a href="${pageContext.request.contextPath}/ticket?action=delete&id=${ticket.ticketId}"
 					       onclick="return confirm('Are you sure you want to delete this ticket?');"
 					       class="text-red-500 hover:text-red-700">

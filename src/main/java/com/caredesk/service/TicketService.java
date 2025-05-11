@@ -94,6 +94,22 @@ public class TicketService {
         return false;
     }
     
+    // Update only Subject, Description, and Category
+    public boolean updateTicketDetails(Ticket ticket) {
+        String query = "UPDATE tickets SET subject = ?, description = ?, category = ? WHERE ticket_id = ?";
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, ticket.getSubject());
+            stmt.setString(2, ticket.getDescription());
+            stmt.setString(3, ticket.getCategory());
+            stmt.setInt(4, ticket.getTicketId());
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
     // Update Ticket Status Only
     public boolean updateTicketStatus(int ticketId, String status) {
         String query = "UPDATE tickets SET status = ? WHERE ticket_id = ?";

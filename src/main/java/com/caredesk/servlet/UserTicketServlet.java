@@ -22,7 +22,6 @@ public class UserTicketServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Login Check
         HttpSession session = request.getSession(false);
         boolean isLoggedIn = (session != null && session.getAttribute("user") != null);
         request.setAttribute("isLoggedIn", isLoggedIn);
@@ -37,7 +36,6 @@ public class UserTicketServlet extends HttpServlet {
 
         try {
             if (action == null) {
-                // List user’s own tickets
                 List<Ticket> allTickets = ticketService.getAllTickets();
                 allTickets.removeIf(ticket -> ticket.getUserId() != userId);
                 request.setAttribute("tickets", allTickets);
@@ -45,6 +43,16 @@ public class UserTicketServlet extends HttpServlet {
 
             } else if ("create".equals(action)) {
                 request.getRequestDispatcher("/client/tickets/create.jsp").forward(request, response);
+
+            } else if ("edit".equals(action)) {
+                int ticketId = Integer.parseInt(request.getParameter("id"));
+                Ticket ticket = ticketService.getTicket(ticketId);
+                if (ticket != null && ticket.getUserId() == userId) {
+                    request.setAttribute("ticket", ticket);
+                    request.getRequestDispatcher("/client/tickets/edit.jsp").forward(request, response);
+                } else {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "You can only edit your own tickets.");
+                }
 
             } else if ("delete".equals(action)) {
                 int ticketId = Integer.parseInt(request.getParameter("id"));
@@ -67,7 +75,6 @@ public class UserTicketServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Login Check
         HttpSession session = request.getSession(false);
         boolean isLoggedIn = (session != null && session.getAttribute("user") != null);
         request.setAttribute("isLoggedIn", isLoggedIn);
@@ -97,6 +104,29 @@ public class UserTicketServlet extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/ticket");
                 } else {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to create ticket.");
+                }
+
+            } else if ("update".equals(action)) {
+                int ticketId = Integer.parseInt(request.getParameter("ticketId"));
+                String subject = request.getParameter("subject");
+                String description = request.getParameter("description");
+                String category = request.getParameter("category");
+
+                Ticket ticket = ticketService.getTicket(ticketId);
+
+                if (ticket != null && ticket.getUserId() == userId) {
+                    ticket.setSubject(subject);
+                    ticket.setDescription(description);
+                    ticket.setCategory(category);
+                    // Status, userId, createdAt remain unchanged
+
+                    if (ticketService.updateTicketDetails(ticket)) {
+                        response.sendRedirect(request.getContextPath() + "/ticket");
+                    } else {
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to update ticket.");
+                    }
+                } else {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "You can only update your own tickets.");
                 }
 
             } else {
